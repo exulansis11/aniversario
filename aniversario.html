@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PARABÉNS 26 ANOS ❤</title>
+<style>
+  @font-face {
+    font-family: 'PixelFallback';
+    src: local('Courier New');
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    background: #0f0f1e;
+    font-family: 'pixelfont', 'PixelFallback', monospace;
+    overflow: hidden;
+    image-rendering: pixelated;
+  }
+  #wrap {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: #0f0f1e;
+  }
+  #gameContainer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 960px;
+    max-height: 640px;
+    aspect-ratio: 16/10;
+    background: #1a1a2e;
+    border: 4px solid #3a3a5c;
+    box-shadow: 0 0 0 4px #0f0f1e, 0 0 40px rgba(255,105,180,0.25);
+    overflow: hidden;
+  }
+  canvas { display:block; width:100%; height:100%; image-rendering: pixelated; }
+
+  .pixel-text {
+    font-family: 'pixelfont', monospace;
+    letter-spacing: 1px;
+    image-rendering: pixelated;
+  }
+
+  /* ---- overlays ---- */
+  .overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; color: #fff;
+    background: rgba(10,10,25,0.92);
+    padding: 4% 6%;
+    z-index: 20;
+  }
+  .hidden { display: none !important; }
+
+  .title-main {
+    font-size: clamp(18px, 4.2vw, 40px);
+    color: #ffd166;
+    text-shadow: 3px 3px 0 #d1495b, -2px -2px 0 #06d6a0;
+    margin-bottom: 14px;
+    line-height: 1.6;
+    animation: bob 1.4s ease-in-out infinite;
+  }
+  @keyframes bob { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-6px);} }
+
+  .subtitle { font-size: clamp(9px, 1.6vw, 14px); color: #8ecae6; margin-bottom: 30px; line-height: 1.9;}
+
+  .blink { animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .btn8 {
+    font-family: 'pixelfont', monospace;
+    background: #d1495b;
+    color: #fff;
+    border: none;
+    padding: 14px 26px;
+    font-size: clamp(9px, 1.5vw, 14px);
+    cursor: pointer;
+    box-shadow: 4px 4px 0 #6a1b2a, -2px 0 0 #ff7a8a inset;
+    letter-spacing: 1px;
+    margin-top: 6px;
+  }
+  .btn8:active { transform: translate(2px,2px); box-shadow: 2px 2px 0 #6a1b2a; }
+
+  .dialog-box {
+    position: absolute;
+    left: 4%; right: 4%; bottom: 5%;
+    background: #0f0f1e;
+    border: 3px solid #ffd166;
+    padding: 14px 18px;
+    color: #fff;
+    font-size: clamp(9px, 1.6vw, 15px);
+    line-height: 1.8;
+    box-shadow: 0 0 0 3px #0f0f1e, 0 6px 0 rgba(0,0,0,0.4);
+    z-index: 15;
+    min-height: 18%;
+  }
+  .dialog-name {
+    color: #06d6a0;
+    font-size: clamp(8px, 1.3vw, 12px);
+    margin-bottom: 8px;
+    display: block;
+  }
+  .dialog-prompt {
+    position: absolute; right: 14px; bottom: 10px;
+    font-size: 14px; color: #ffd166;
+  }
+
+  #hud {
+    position: absolute; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px;
+    color: #fff;
+    font-size: clamp(8px, 1.4vw, 12px);
+    z-index: 10;
+    pointer-events: none;
+    text-shadow: 2px 2px 0 #000;
+  }
+  #hud .hearts { color: #ff6b9d; }
+  #hud .progress-outer {
+    width: 40%;
+    height: 10px;
+    background: #1a1a2e;
+    border: 2px solid #fff;
+  }
+  #hud .progress-inner {
+    height: 100%;
+    background: linear-gradient(90deg,#06d6a0,#ffd166);
+    width: 0%;
+  }
+
+  /* touch controls */
+  #controls {
+    position: absolute; bottom: 12px; left: 0; right: 0;
+    display: flex; justify-content: space-between; padding: 0 14px;
+    z-index: 25; pointer-events: none;
+  }
+  #controls.hidden-controls { display: none; }
+  .ctrl-group { display: flex; gap: 8px; pointer-events: all; }
+  .ctrl-btn {
+    width: 52px; height: 52px;
+    background: rgba(255,255,255,0.14);
+    border: 2px solid rgba(255,255,255,0.5);
+    color: #fff;
+    font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(2px);
+  }
+  .ctrl-btn:active { background: rgba(255,255,255,0.35); }
+
+  #muteBtn {
+    position: absolute; top: 10px; right: 10px;
+    z-index: 30; background: rgba(0,0,0,0.4); color: #fff; border: 2px solid #fff;
+    width: 34px; height: 34px; font-size: 14px; cursor: pointer;
+  }
+
+  #skipBtn {
+    position:absolute; top:10px; left:10px; z-index:30;
+    background: rgba(0,0,0,0.4); color:#ffd166; border: 2px solid #ffd166;
+    font-size: 9px; padding: 6px 8px; cursor:pointer; font-family: inherit;
+  }
+
+  .hint { font-size: clamp(7px, 1.2vw, 10px); color: #6b7280; margin-top: 24px; }
+
+  .heart-final { color: #ff6b9d; }
+
+  #endingText {
+    font-size: clamp(9px, 1.7vw, 15px);
+    line-height: 2.1;
+    max-width: 640px;
+    color: #f1faee;
+  }
+
+  @keyframes floatUp {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-40px); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+<div id="gameContainer">
+
+  <div id="hud" class="hidden">
+    <div class="hearts" id="heartCount">♥ x 0</div>
+    <div class="progress-outer"><div class="progress-inner" id="progressBar"></div></div>
+    <div id="stageLabel">FASE 1</div>
+  </div>
+
+  <button id="muteBtn" class="hidden">♪</button>
+  <button id="skipBtn" class="hidden">PULAR ▶</button>
+
+  <canvas id="game"></canvas>
+
+  <div class="dialog-box hidden" id="dialogBox">
+    <span class="dialog-name" id="dialogName">MEMÓRIA</span>
+    <span id="dialogText"></span>
+    <span class="dialog-prompt blink">▼</span>
+  </div>
+
+  <div id="controls" class="hidden-controls">
+    <div class="ctrl-group">
+      <div class="ctrl-btn" id="btnLeft">◀</div>
+      <div class="ctrl-btn" id="btnRight">▶</div>
+    </div>
+    <div class="ctrl-group">
+      <div class="ctrl-btn" id="btnAction">●</div>
+      <div class="ctrl-btn" id="btnJump">▲</div>
+    </div>
+  </div>
+
+  <!-- TITLE SCREEN -->
+  <div class="overlay" id="titleScreen">
+    <div class="title-main">FELIZ<br>ANIVERSÁRIO</div>
+    <div class="subtitle">UMA JORNADA 8-BIT<br>PELOS NOSSOS 5 ANOS<br>(quase 6!)</div>
+    <button class="btn8" id="startBtn">▶ START</button>
+    <div class="hint">use as setas / A D para andar, ESPAÇO para pular e interagir<br>ou os botões na tela no celular</div>
+  </div>
+
+  <!-- ENDING SCREEN -->
+  <div class="overlay hidden" id="endingScreen">
+    <div class="title-main" style="font-size:clamp(14px,3vw,26px)">PARABÉNS<br>PELOS SEUS 26 ANOS</div>
+    <div id="endingText"></div>
+    <button class="btn8 hidden" id="replayBtn">♥ JOGAR DE NOVO ♥</button>
+  </div>
+
+</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============ CANVAS SETUP ============ */
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const CW = 320, CH = 200; // internal low-res for pixel look
+canvas.width = CW; canvas.height = CH;
+ctx.imageSmoothingEnabled = false;
+
+function resize(){
+  const container = document.getElementById('gameContainer');
+  const rect = container.getBoundingClientRect();
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+}
+window.addEventListener('resize', resize);
+resize();
+
+/* ============ AUDIO (procedural 8-bit) ============ */
+let audioCtx = null;
+let musicOn = true;
+let musicTimer = null;
+let musicStep = 0;
+
+function ensureAudio(){
+  if (!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function beep(freq, dur, type, vol, delay){
+  if (!musicOn || !audioCtx) return;
+  const t0 = audioCtx.currentTime + (delay||0);
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type || 'square';
+  osc.frequency.setValueAtTime(freq, t0);
+  gain.gain.setValueAtTime(0, t0);
+  gain.gain.linearRampToValueAtTime(vol||0.06, t0+0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(t0); osc.stop(t0+dur+0.02);
+}
+
+function sfxJump(){ beep(520,0.09,'square',0.05); beep(780,0.09,'square',0.04,0.05); }
+function sfxCollect(){ beep(880,0.08,'square',0.06); beep(1320,0.1,'square',0.05,0.06); }
+function sfxCheckpoint(){ beep(660,0.12,'triangle',0.07); beep(880,0.12,'triangle',0.06,0.1); beep(1100,0.18,'triangle',0.06,0.2); }
+function sfxCandle(){ beep(300+Math.random()*200,0.07,'square',0.05); }
+function sfxFanfare(){
+  const notes=[523,659,784,1046,784,1046,1318];
+  notes.forEach((n,i)=>beep(n,0.22,'square',0.06,i*0.16));
+}
+
+// simple looping chiptune background melody
+const melody = [
+  392,0,440,0,494,0,523,0, 494,0,440,0,392,0,0,0,
+  392,0,440,0,494,0,523,0, 587,0,523,0,494,0,440,0
+];
+let melIdx = 0;
+function startMusic(){
+  ensureAudio();
+  if (musicTimer) return;
+  musicTimer = setInterval(()=>{
+    if (!musicOn) return;
+    const note = melody[melIdx % melody.length];
+    if (note) beep(note, 0.14, 'square', 0.035);
+    if (melIdx % 4 === 0) beep(note ? note/2 : 196, 0.14, 'triangle', 0.02);
+    melIdx++;
+  }, 165);
+}
+function stopMusic(){ if (musicTimer){ clearInterval(musicTimer); musicTimer = null; } }
+
+document.getElementById('muteBtn').addEventListener('click', ()=>{
+  musicOn = !musicOn;
+  document.getElementById('muteBtn').textContent = musicOn ? '♪' : '✕';
+});
+
+/* ============ GAME DATA ============ */
+// Checkpoints: journey through the relationship
+const checkpoints = [
+  {
+    x: 480, name: "ANO 1", icon:"school",
+    text: "Tudo começou na universidade. Entre livros, corredores e aulas, eu te encontrei — e a partir dali, nada mais fez sentido sem você por perto."
+  },
+  {
+    x: 1000, name: "CONQUISTAS", icon:"trophy",
+    text: "Comemoramos vitórias juntos, grandes e pequenas. Cada conquista sua eu vivo como se fosse minha, porque de certa forma, é."
+  },
+  {
+    x: 1520, name: "DESAFIOS", icon:"heart-shield",
+    text: "Enfrentamos momentos difíceis também. E em cada um deles, você mostrou a força e o cuidado que fazem de você quem você é."
+  },
+  {
+    x: 2040, name: "CIÊNCIA & CUIDADO", icon:"lab-heart",
+    text: "Eu pesquiso remédios que podem curar. Você cuida de pessoas, corpo e alma, na reabilitação. Somos parecidos: dois jeitos de cuidar do mundo."
+  },
+  {
+    x: 2560, name: "5 ANOS", icon:"calendar",
+    text: "5 anos de nós, caminhando para o 6°. Cada ano com você foi um upgrade na minha vida — mais amor, mais cumplicidade, mais certeza."
+  },
+];
+
+const LEVEL_END_X = 3100;
+const GROUND_Y = 150;
+
+/* ============ PLAYER ============ */
+const player = {
+  x: 20, y: GROUND_Y - 16, w: 12, h: 16,
+  vx: 0, vy: 0,
+  onGround: true,
+  facing: 1,
+  animFrame: 0, animTimer: 0,
+  jumping: false
+};
+const GRAVITY = 0.5;
+const MOVE_SPEED = 1.6;
+const JUMP_V = -7.2;
+
+let camX = 0;
+let hearts = 0;
+let stage = 1;
+let lastCheckpointIdx = -1;
+let gameState = 'title'; // title, playing, dialog, boss, ending
+let dialogQueue = [];
+let currentDialog = null;
+
+// collectible hearts scattered
+const collectibles = [];
+(function genCollectibles(){
+  let x = 150;
+  while (x < LEVEL_END_X - 100) {
+    collectibles.push({x: x, y: GROUND_Y - 30 - (Math.random()*20|0), got:false});
+    x += 90 + (Math.random()*60|0);
+  }
+})();
+
+// simple clouds / decoration
+const clouds = [];
+for (let i=0;i<14;i++){
+  clouds.push({x: Math.random()*LEVEL_END_X, y: 20+Math.random()*40, s: 0.6+Math.random()*0.8});
+}
+const flowers = [];
+for (let i=0;i<40;i++){
+  flowers.push({x: Math.random()*LEVEL_END_X, color: ['#ff6b9d','#ffd166','#06d6a0','#8ecae6'][Math.floor(Math.random()*4)]});
+}
+
+/* ============ INPUT ============ */
+const keys = {left:false,right:false,jump:false,action:false};
+
+window.addEventListener('keydown', (e)=>{
+  if (['ArrowLeft','a','A'].includes(e.key)) keys.left = true;
+  if (['ArrowRight','d','D'].includes(e.key)) keys.right = true;
+  if ([' ','ArrowUp','w','W'].includes(e.key)) { keys.jump = true; keys.action = true; e.preventDefault(); }
+});
+window.addEventListener('keyup', (e)=>{
+  if (['ArrowLeft','a','A'].includes(e.key)) keys.left = false;
+  if (['ArrowRight','d','D'].includes(e.key)) keys.right = false;
+  if ([' ','ArrowUp','w','W'].includes(e.key)) { keys.jump = false; keys.action = false; }
+});
+
+function bindHold(id, prop){
+  const el = document.getElementById(id);
+  const down = (e)=>{ keys[prop]=true; e.preventDefault(); };
+  const up = (e)=>{ keys[prop]=false; e.preventDefault(); };
+  el.addEventListener('touchstart', down, {passive:false});
+  el.addEventListener('touchend', up);
+  el.addEventListener('mousedown', down);
+  el.addEventListener('mouseup', up);
+  el.addEventListener('mouseleave', up);
+}
+bindHold('btnLeft','left');
+bindHold('btnRight','right');
+bindHold('btnJump','jump');
+document.getElementById('btnAction').addEventListener('click', ()=>{ handleAction(); });
+
+if ('ontouchstart' in window) {
+  document.getElementById('controls').classList.remove('hidden-controls');
+}
+
+/* ============ DIALOG SYSTEM ============ */
+const dialogBox = document.getElementById('dialogBox');
+const dialogText = document.getElementById('dialogText');
+const dialogName = document.getElementById('dialogName');
+
+function showDialog(name, text){
+  gameState = 'dialog';
+  dialogName.textContent = name;
+  dialogText.textContent = text;
+  dialogBox.classList.remove('hidden');
+  sfxCheckpoint();
+}
+function closeDialog(){
+  dialogBox.classList.add('hidden');
+  gameState = 'playing';
+}
+
+function handleAction(){
+  if (gameState === 'dialog'){
+    closeDialog();
+  } else if (gameState === 'playing'){
+    doJump();
+  } else if (gameState === 'boss'){
+    blowCandle();
+  }
+}
+
+/* ============ GAME LOOP ============ */
+function doJump(){
+  if (player.onGround){
+    player.vy = JUMP_V;
+    player.onGround = false;
+    sfxJump();
+  }
+}
+
+function update(){
+  if (gameState !== 'playing') return;
+
+  if (keys.left){ player.vx = -MOVE_SPEED; player.facing = -1; }
+  else if (keys.right){ player.vx = MOVE_SPEED; player.facing = 1; }
+  else { player.vx = 0; }
+
+  if (keys.jump) doJump();
+
+  player.x += player.vx;
+  if (player.x < 4) player.x = 4;
+
+  player.vy += GRAVITY;
+  player.y += player.vy;
+  if (player.y >= GROUND_Y - player.h){
+    player.y = GROUND_Y - player.h;
+    player.vy = 0;
+    player.onGround = true;
+  }
+
+  if (player.vx !== 0){
+    player.animTimer++;
+    if (player.animTimer > 6){ player.animTimer = 0; player.animFrame = (player.animFrame+1)%2; }
+  }
+
+  // camera
+  camX = Math.max(0, player.x - CW/2);
+  camX = Math.min(camX, LEVEL_END_X - CW);
+
+  // collectibles
+  collectibles.forEach(c=>{
+    if (!c.got && Math.abs((c.x) - (player.x+player.w/2)) < 10 && Math.abs((c.y+6) - (player.y+player.h/2)) < 14){
+      c.got = true; hearts++; sfxCollect();
+      document.getElementById('heartCount').textContent = '♥ x ' + hearts;
+    }
+  });
+
+  // checkpoints
+  checkpoints.forEach((cp, idx)=>{
+    if (idx > lastCheckpointIdx && player.x + player.w/2 >= cp.x){
+      lastCheckpointIdx = idx;
+      stage = idx + 2;
+      document.getElementById('stageLabel').textContent = 'FASE ' + (idx+1) + '/' + checkpoints.length;
+      showDialog(cp.name, cp.text);
+    }
+  });
+
+  // progress bar
+  const pct = Math.min(100, (player.x / LEVEL_END_X) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+
+  // reached end -> boss
+  if (player.x >= LEVEL_END_X - 40){
+    startBoss();
+  }
+}
+
+/* ============ RENDER ============ */
+function drawPixelRect(x,y,w,h,color){
+  ctx.fillStyle = color;
+  ctx.fillRect(Math.round(x - camX), Math.round(y), w, h);
+}
+
+function drawBackground(){
+  // sky gradient by "stage"
+  const hueShift = Math.min(1, camX / LEVEL_END_X);
+  const skyTop = lerpColor('#1a1a4e','#3a1a5c', hueShift);
+  const skyBot = lerpColor('#4a3a7c','#7c3a6c', hueShift);
+  const grad = ctx.createLinearGradient(0,0,0,GROUND_Y);
+  grad.addColorStop(0, skyTop);
+  grad.addColorStop(1, skyBot);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,CW,GROUND_Y);
+
+  // stars
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  for (let i=0;i<40;i++){
+    const sx = (i*97 + 31) % (LEVEL_END_X);
+    const sy = (i*53) % (GROUND_Y-20);
+    if (sx - camX*0.3 > -10 && sx - camX*0.3 < CW+10){
+      ctx.fillRect(Math.round(sx - camX*0.3), sy, 1, 1);
+    }
+  }
+
+  // clouds (parallax)
+  clouds.forEach(c=>{
+    const sx = c.x - camX*0.5;
+    if (sx > -30 && sx < CW+30){
+      ctx.fillStyle = 'rgba(255,255,255,0.75)';
+      const cw = 18*c.s, ch=7*c.s;
+      ctx.fillRect(sx, c.y, cw, ch);
+      ctx.fillRect(sx+cw*0.25, c.y-ch*0.6, cw*0.6, ch*0.6);
+    }
+  });
+
+  // distant buildings representing "university" early, "lab/clinic" later
+  ctx.fillStyle = 'rgba(20,20,50,0.6)';
+  for (let i=0;i<24;i++){
+    const bx = i*160 - (camX*0.6)%160 - 160;
+    const bh = 30 + (i%3)*14;
+    ctx.fillRect(bx, GROUND_Y-bh, 40, bh);
+    ctx.fillStyle = 'rgba(255,209,102,0.25)';
+    for (let wy=0; wy<bh-8; wy+=12){
+      ctx.fillRect(bx+6,GROUND_Y-bh+wy+4,5,5);
+      ctx.fillRect(bx+22,GROUND_Y-bh+wy+4,5,5);
+    }
+    ctx.fillStyle = 'rgba(20,20,50,0.6)';
+  }
+
+  // ground
+  ctx.fillStyle = '#2a9d5c';
+  ctx.fillRect(0, GROUND_Y, CW, CH-GROUND_Y);
+  ctx.fillStyle = '#1c7a45';
+  for (let gx = -((camX)%16); gx < CW; gx+=16){
+    ctx.fillRect(gx, GROUND_Y, 8, 4);
+  }
+  ctx.fillStyle = '#4b2e1e';
+  ctx.fillRect(0, GROUND_Y+10, CW, CH-GROUND_Y-10);
+
+  // flowers
+  flowers.forEach(f=>{
+    const sx = f.x - camX;
+    if (sx > -4 && sx < CW+4){
+      ctx.fillStyle = f.color;
+      ctx.fillRect(sx, GROUND_Y-3, 2, 2);
+      ctx.fillStyle = '#2a9d5c';
+      ctx.fillRect(sx, GROUND_Y-1, 1, 3);
+    }
+  });
+}
+
+function lerpColor(a,b,t){
+  const pa = hexToRgb(a), pb = hexToRgb(b);
+  const r = Math.round(pa.r + (pb.r-pa.r)*t);
+  const g = Math.round(pa.g + (pb.g-pa.g)*t);
+  const bl = Math.round(pa.b + (pb.b-pa.b)*t);
+  return `rgb(${r},${g},${bl})`;
+}
+function hexToRgb(hex){
+  const v = parseInt(hex.slice(1),16);
+  return {r:(v>>16)&255, g:(v>>8)&255, b:v&255};
+}
+
+function drawCollectibles(){
+  collectibles.forEach(c=>{
+    if (c.got) return;
+    const sx = c.x - camX;
+    if (sx < -10 || sx > CW+10) return;
+    const bob = Math.sin((Date.now()/200)+c.x)*2;
+    drawHeart(sx, c.y+bob, '#ff6b9d');
+  });
+}
+
+function drawHeart(x,y,color){
+  ctx.fillStyle = color;
+  ctx.fillRect(x-3,y-2,2,2);
+  ctx.fillRect(x+1,y-2,2,2);
+  ctx.fillRect(x-4,y-1,8,2);
+  ctx.fillRect(x-3,y+1,6,1);
+  ctx.fillRect(x-2,y+2,4,1);
+  ctx.fillRect(x-1,y+3,2,1);
+}
+
+function drawCheckpoints(){
+  checkpoints.forEach((cp, idx)=>{
+    const sx = cp.x - camX;
+    if (sx < -20 || sx > CW+20) return;
+    const done = idx <= lastCheckpointIdx;
+    ctx.fillStyle = '#8b5a2b';
+    ctx.fillRect(sx, GROUND_Y-40, 3, 40);
+    ctx.fillStyle = done ? '#06d6a0' : '#ffd166';
+    ctx.fillRect(sx+3, GROUND_Y-40, 16, 10);
+    ctx.fillStyle = '#0f0f1e';
+    ctx.font = '6px monospace';
+    ctx.fillText(String(idx+1), sx+8, GROUND_Y-32);
+  });
+  // final flag (cake)
+  const sx = LEVEL_END_X - camX;
+  if (sx > -30 && sx < CW+30){
+    drawCake(sx, GROUND_Y-30);
+  }
+}
+
+function drawCake(x,y){
+  ctx.fillStyle = '#f4978e';
+  ctx.fillRect(x-10,y+10,20,14);
+  ctx.fillStyle = '#ffd166';
+  ctx.fillRect(x-10,y+6,20,6);
+  ctx.fillStyle = '#fff';
+  for (let i=-8;i<=8;i+=6){
+    ctx.fillStyle = '#ff6b9d';
+    ctx.fillRect(x+i,y,2,8);
+    if (!candlesBlown[Math.round((i+8)/6)]){
+      ctx.fillStyle = '#ffb703';
+      ctx.fillRect(x+i-1,y-4,4,4);
+    }
+  }
+}
+
+function drawPlayer(){
+  const sx = player.x - camX;
+  const sy = player.y;
+  const bodyColor = '#3a2a1a'; // dark outfit
+  const skinColor = '#a86b3c';
+  const beardColor = '#1a1210';
+  const f = player.animFrame;
+
+  ctx.save();
+  ctx.translate(sx + player.w/2, 0);
+  ctx.scale(player.facing, 1);
+  ctx.translate(-player.w/2, 0);
+
+  // legs (simple walk cycle)
+  ctx.fillStyle = '#22303c';
+  if (player.onGround && player.vx !== 0){
+    ctx.fillRect(2, sy+11, 3, f===0?5:3);
+    ctx.fillRect(7, sy+11, 3, f===0?3:5);
+  } else {
+    ctx.fillRect(2, sy+11, 3, 5);
+    ctx.fillRect(7, sy+11, 3, 5);
+  }
+  // torso
+  ctx.fillStyle = bodyColor;
+  ctx.fillRect(1, sy+5, 10, 7);
+  // arm with tattoo mark
+  ctx.fillStyle = skinColor;
+  ctx.fillRect(9, sy+6, 2, 5);
+  ctx.fillStyle = '#3a6ea5';
+  ctx.fillRect(9, sy+8, 2, 1); // tattoo hint
+  // head
+  ctx.fillStyle = skinColor;
+  ctx.fillRect(2, sy, 8, 6);
+  // hair (short)
+  ctx.fillStyle = '#111';
+  ctx.fillRect(2, sy-1, 8, 2);
+  // beard
+  ctx.fillStyle = beardColor;
+  ctx.fillRect(2, sy+3, 8, 3);
+  ctx.fillStyle = skinColor;
+  ctx.fillRect(4, sy+3, 4, 1);
+
+  ctx.restore();
+}
+
+function render(){
+  ctx.clearRect(0,0,CW,CH);
+  drawBackground();
+  drawCollectibles();
+  drawCheckpoints();
+  if (gameState !== 'boss' && gameState !== 'ending') drawPlayer();
+}
+
+function loop(){
+  update();
+  render();
+  requestAnimationFrame(loop);
+}
+
+/* ============ BOSS / CANDLE SEQUENCE ============ */
+const TOTAL_CANDLES = 4;
+let candlesBlown = [false,false,false,false,false];
+let blownCount = 0;
+
+function startBoss(){
+  gameState = 'boss';
+  stopMusic();
+  showBossPrompt();
+}
+
+function showBossPrompt(){
+  dialogName.textContent = 'ÚLTIMA FASE';
+  dialogText.textContent = 'Chegou a hora! Aperte o botão ● (ou ESPAÇO) para apagar as velinhas dos seus 26 anos!';
+  dialogBox.classList.remove('hidden');
+}
+
+function blowCandle(){
+  if (blownCount >= TOTAL_CANDLES) return;
+  candlesBlown[blownCount] = true;
+  blownCount++;
+  sfxCandle();
+  dialogText.textContent = blownCount < TOTAL_CANDLES
+    ? `Vela ${blownCount} apagada! Faltam ${TOTAL_CANDLES-blownCount}...`
+    : 'Todas as velinhas apagadas! 🎉';
+  if (blownCount >= TOTAL_CANDLES){
+    setTimeout(()=>{
+      dialogBox.classList.add('hidden');
+      goToEnding();
+    }, 900);
+  }
+}
+
+/* ============ ENDING ============ */
+function goToEnding(){
+  gameState = 'ending';
+  sfxFanfare();
+  document.getElementById('hud').classList.add('hidden');
+  document.getElementById('controls').classList.add('hidden-controls');
+  document.getElementById('muteBtn').classList.add('hidden');
+  document.getElementById('skipBtn').classList.add('hidden');
+
+  const endingScreen = document.getElementById('endingScreen');
+  const endingText = document.getElementById('endingText');
+  endingText.innerHTML = `
+    Você coletou <span class="heart-final">${hearts} corações</span> ao longo da nossa jornada —
+    e olha que isso nem chega perto de todos os motivos que eu tenho pra te amar.<br><br>
+    Você é a pessoa mais incrível que eu conheço. Inteligente, forte, cuidadosa com todo mundo
+    ao seu redor — e ainda assim encontra tempo e carinho pra cuidar de mim também.<br><br>
+    Cada um dos nossos 5 anos foi especial do seu jeito: as risadas, as conquistas, os dias difíceis
+    que a gente atravessou de mãos dadas. E olha a gente aqui, prestes a começar o 6°.<br><br>
+    Hoje o jogo é seu: 26 fases de uma vida linda, e eu quero continuar jogando esse "co-op"
+    com você para sempre.<br><br>
+    <strong style="color:#ffd166">Feliz aniversário, meu amor.</strong><br>
+    Eu te amo mais do que qualquer highscore seria capaz de mostrar. ❤
+  `;
+  endingScreen.classList.remove('hidden');
+  document.getElementById('replayBtn').classList.remove('hidden');
+  spawnFireworks();
+}
+
+function spawnFireworks(){
+  let count = 0;
+  const fwInterval = setInterval(()=>{
+    if (count > 18) { clearInterval(fwInterval); return; }
+    count++;
+    const fx = Math.random()*CW;
+    const fy = 20 + Math.random()*80;
+    burstAt(fx, fy);
+    beep(600+Math.random()*400, 0.12, 'triangle', 0.04);
+  }, 260);
+}
+let particles = [];
+function burstAt(x,y){
+  const colors = ['#ff6b9d','#ffd166','#06d6a0','#8ecae6','#f4978e'];
+  const color = colors[Math.floor(Math.random()*colors.length)];
+  for (let i=0;i<10;i++){
+    const angle = (Math.PI*2)*(i/10);
+    particles.push({
+      x, y, vx: Math.cos(angle)*1.4, vy: Math.sin(angle)*1.4,
+      life: 30, color
+    });
+  }
+}
+function renderParticles(){
+  ctx.clearRect(0,0,CW,CH);
+  // dark bg for ending fireworks
+  const grad = ctx.createLinearGradient(0,0,0,CH);
+  grad.addColorStop(0,'#1a0a2e');
+  grad.addColorStop(1,'#2e0a3e');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,CW,CH);
+  particles.forEach(p=>{
+    p.x += p.vx; p.y += p.vy; p.vy += 0.02; p.life--;
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x, p.y, 2, 2);
+  });
+  particles = particles.filter(p=>p.life>0);
+}
+function particleLoop(){
+  if (gameState === 'ending'){
+    renderParticles();
+  }
+  requestAnimationFrame(particleLoop);
+}
+particleLoop();
+
+/* ============ START / SKIP / REPLAY ============ */
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  ensureAudio();
+  startMusic();
+  document.getElementById('titleScreen').classList.add('hidden');
+  document.getElementById('hud').classList.remove('hidden');
+  document.getElementById('muteBtn').classList.remove('hidden');
+  document.getElementById('skipBtn').classList.remove('hidden');
+  document.getElementById('heartCount').textContent = '♥ x 0';
+  document.getElementById('stageLabel').textContent = 'FASE 1/' + checkpoints.length;
+  gameState = 'playing';
+  loop();
+});
+
+document.getElementById('skipBtn').addEventListener('click', ()=>{
+  // skip straight to ending for impatience / accessibility
+  lastCheckpointIdx = checkpoints.length - 1;
+  player.x = LEVEL_END_X - 40;
+  startBoss();
+});
+
+document.getElementById('replayBtn').addEventListener('click', ()=>{
+  location.reload();
+});
+
+// clicking/tapping the dialog box advances it (besides the action button)
+dialogBox.addEventListener('click', ()=>{ handleAction(); });
+
+// also allow tapping the game canvas to jump (playing state) / advance dialog
+canvas.addEventListener('click', ()=>{
+  if (gameState === 'dialog') closeDialog();
+  else if (gameState === 'playing') doJump();
+});
+
+})();
+</script>
+</body>
+</html>
